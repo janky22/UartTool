@@ -24,7 +24,12 @@ def str2hexstr(string):
     return text
 
 def hexstr2hex(hexstr):
-    return bytes(bytearray.fromhex(hexstr))
+    hexhex = []
+    hh = bytes(bytearray.fromhex(hexstr))
+    for h in hh :
+        if h != 0x20 :
+            hexhex.append(h)
+    return hexhex
 
 def hex2str(hex_):
     string = ""
@@ -178,20 +183,23 @@ class UartTool(wx.Frame):
         self.__RxDisplay.SetLabelText("")
 
     def __on_uartSend(self, event):
-        # try :
-        text = self.__TxText.GetValue()
-        if self.__hexS.GetValue() == True :
-            text = hexstr2hex(text)
-            self.uart._uartSend(text)
-            text = hex2str(text)
-            self.__RxDisplay.AppendText("[%s]S: "%get_time_stamp() + text + "\r")
-
-        else :
-            self.uart._uartSend(text,'gb2312')
-            self.__RxDisplay.AppendText("[%s]S: "%get_time_stamp() + text + "\r")
-        self.__tips('发送完成')
-        # except :
-        #     self.__tips('请打开串口')
+        try :
+            text = self.__TxText.GetValue()
+            if self.__hexS.GetValue() == True :
+                try :
+                    text = hexstr2hex(text)
+                    self.uart._uartSend(text)
+                    text = hex2str(text)
+                    self.__RxDisplay.AppendText("[%s]S: "%get_time_stamp() + text + "\r")
+                except :
+                    self.__tips('输入的是非法hex')
+                    return
+            else :
+                self.uart._uartSend(text,'gb2312')
+                self.__RxDisplay.AppendText("[%s]S: "%get_time_stamp() + text + "\r")
+            self.__tips('发送完成')
+        except :
+            self.__tips('请打开串口')
 
     def __on_uartCtrl(self, event):
             try :
